@@ -1,29 +1,14 @@
-module One (..) where
+module One exposing (..)
 
+import Html exposing (..)
+import Html.App as Html
+import Time exposing (Time, millisecond)
+import Html.Attributes as A
 import Sprite exposing (..)
 import Array
-import Html exposing (..)
-import Html.Events exposing (on, targetValue)
-import Html.Attributes as A
-import Effects exposing (Effects, none)
-import Signal exposing (message, Address)
-import Time exposing (Time, fps)
-import StartApp
 
-
-type Action
-    = Tick Time
-
-
-init : Sprite {}
-init =
-    { sheet = "https://10firstgames.files.wordpress.com/2012/02/actionstashhd.png"
-    , rows = 16
-    , columns = 16
-    , size = ( 2048, 2048 )
-    , frame = 0
-    , dope = idle
-    }
+type Msg
+  = Tick Time
 
 
 dopeRow : Int -> List ( Int, Int )
@@ -36,45 +21,50 @@ idle =
     dopeRow 0 |> Array.fromList
 
 
-view : Address Action -> Sprite {} -> Html
-view address s =
-    let
-        onInput address contentToValue =
-            on
-                "input"
-                targetValue
-                (message address << contentToValue)
-    in
-        div
-            []
-            [ node
-                "sprite"
-                [ A.style (sprite s) ]
-                []
-            ]
+init : (Sprite {}, Cmd Msg)
+init = (
+  { sheet = "https://10firstgames.files.wordpress.com/2012/02/actionstashhd.png"
+    , rows = 16
+    , columns = 16
+    , size = ( 2048, 2048 )
+    , frame = 0
+    , dope = idle
+    } , Cmd.none)
 
 
-update : Action -> Sprite {} -> ( Sprite {}, Effects Action )
-update action s =
+update : Msg -> Sprite {} -> (Sprite {}, Cmd Msg)
+update msg model =
     let
         s' =
-            case action of
+            case msg of
                 Tick _ ->
-                    advance s
+                    advance model
     in
-        ( s', none )
+        ( s', Cmd.none )
 
 
-app : StartApp.App (Sprite {})
-app =
-    StartApp.start
-        { view = view
-        , update = update
-        , init = ( init, none )
-        , inputs = [ Signal.map Tick (fps 30) ]
-        }
+view : Sprite {} -> Html Msg
+view s =
+  div
+      []
+      [
+        node
+          "sprite"
+          [ A.style (sprite s)]
+          []
+      ]
 
 
-main : Signal Html
+subs : Sprite {} -> Sub Msg
+subs model =
+  Time.every (millisecond * 33) Tick
+
+
+main : Program Never
 main =
-    app.html
+  Html.program
+    { init = init
+    , update = update
+    , view = view
+    , subscriptions = subs
+    }
