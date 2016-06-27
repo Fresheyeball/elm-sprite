@@ -1,4 +1,4 @@
-module Sprite (..) where
+module Sprite exposing (..)
 
 {-|
 A few simple things for Sprite rendering with elm-html.
