@@ -1,4 +1,4 @@
-# DEPRICATED
+# deprecated
 
 Go here instead. https://github.com/Fresheyeball/sprite
 
